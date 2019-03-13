@@ -56,39 +56,52 @@ lazy_static! {
 
 // A string that matches the expected english letters frequency has score of 0.
 // The higher the score, the less english it looks.
-fn non_english_score(s: &str) -> f64 {
+fn non_english_score(_key: usize, s: &str) -> f64 {
     let mut char_counts: HashMap<char, i64> = HashMap::new();
 
-    for ch in s.chars() {
-        match char_counts.get_mut(&ch) {
-            Some(count) => {
-                *count += 1;
-            }
-            _ => {
-                char_counts.insert(ch, 1);
-            }
-        }
-    }
-
-    let len = s.len() as f64;
     let mut score: f64 = 0.0;
 
-    for (ch, count) in char_counts.iter() {
+    for ch in s.chars() {
         // scoring for English-like text
         if !(ch.is_alphanumeric() || ch.is_whitespace() || ch.is_ascii_punctuation()) {
-            score += (*count as f64) * 1000.0;
-            // score += *count as f64;
-            continue;
+            score += 1000.0;
+        }
+
+        if ch.is_uppercase() {
+            // penalty for upper case letters because they are rarer
+            score += 100.0;
         }
 
         if ch.is_ascii_punctuation() {
             // give punctuation a slight penalty
             score += 100.0;
-            continue;
         }
 
+        if ch == ' ' {
+            // encourage whitespace
+            score -= 100.0;
+        }
+
+        let lch = ch.to_ascii_lowercase();
+
+        char_counts
+            .entry(lch)
+            .and_modify(|count| *count += 1)
+            .or_insert(1);
+        //
+        // Or equivalently:
+        //
+        // let count = char_counts.entry(ch).or_insert(0);
+        // *count += 1;
+    }
+
+    let len = s.len() as f64;
+
+    for (ch, count) in &char_counts {
+        let lch = ch.to_ascii_lowercase();
+
         let freq = len / (*count as f64);
-        let english_freq: f64 = match LETTERS_FREQ.get(ch) {
+        let english_freq: f64 = match LETTERS_FREQ.get(&lch) {
             Some(freq) => *freq,
             None => 0.0f64,
         };
@@ -117,7 +130,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 buf = err.into_bytes();
             }
             Ok(s) => {
-                let score = non_english_score(&s);
+                let score = non_english_score(key as usize, &s);
 
                 results.push(DecodeResult {
                     key: key,
