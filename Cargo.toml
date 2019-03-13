@@ -6,6 +6,6 @@ edition = "2018"
 
 [workspace]
 
-members= ["e01", "e02", "e03"]
+members= ["e01", "e02", "e03", "e04"]
 
 [dependencies]

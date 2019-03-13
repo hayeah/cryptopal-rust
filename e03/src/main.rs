@@ -12,7 +12,7 @@ fn xor(dst: &mut [u8], src: &[u8], mask: u8) {
     }
 }
 
-#[derive(PartialEq, PartialOrd)]
+#[derive(PartialEq, PartialOrd, Default, Clone)]
 struct DecodeResult {
     score: f64,
     key: u8,
@@ -104,24 +104,30 @@ fn main() -> Result<(), Box<dyn Error>> {
     let input =
         hex::decode("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")?;
 
-    let mut results: Vec<DecodeResult> = vec![];
+    let mut results: Vec<DecodeResult> = vec![DecodeResult::default(); 255];
+    results.truncate(0);
 
-    for c in 0x00..0xff {
-        // a-z
-        let mut buf = vec![0; input.len()];
-        xor(&mut buf, &input, c);
-        let r = String::from_utf8(buf);
+    let mut buf = vec![0; input.len()];
+    for key in 0x00..0xff {
+        xor(&mut buf, &input, key);
 
-        if r.is_ok() {
-            let s = r.unwrap();
+        match String::from_utf8(buf) {
+            Err(err) => {
+                // Reuse the buffer that failed to parse into a string
+                buf = err.into_bytes();
+            }
+            Ok(s) => {
+                let score = non_english_score(&s);
 
-            let score = non_english_score(&s);
+                results.push(DecodeResult {
+                    key: key,
+                    ptext: s,
+                    score: score,
+                });
 
-            results.push(DecodeResult {
-                key: c,
-                ptext: s,
-                score: score,
-            })
+                // Allocate a new buffer for the next decode
+                buf = vec![0; input.len()];
+            }
         }
     }
 
