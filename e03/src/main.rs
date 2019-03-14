@@ -19,6 +19,63 @@ struct DecodeResult {
     ptext: String,
 }
 
+// SingleCharKeyCracker iterates through the ASCII bytes, as key to a xor cipher
+struct SingleCharKeyCracker {
+    ctext: Vec<u8>,
+    current_byte: usize,
+
+    decode_buf: Option<Vec<u8>>,
+}
+
+impl SingleCharKeyCracker {
+    fn new(ctext: Vec<u8>) -> SingleCharKeyCracker {
+        return SingleCharKeyCracker {
+            ctext: ctext,
+            current_byte: 0,
+            decode_buf: None,
+        };
+    }
+}
+
+impl Iterator for SingleCharKeyCracker {
+    type Item = DecodeResult;
+
+    fn next(&mut self) -> Option<DecodeResult> {
+        while self.current_byte <= 255 {
+            let key = self.current_byte as u8;
+
+            let mut buf = self
+                .decode_buf
+                .take()
+                .unwrap_or_else(|| vec![0; self.ctext.len()]);
+
+            xor(&mut buf, &self.ctext, key);
+
+            match String::from_utf8(buf) {
+                Err(err) => {
+                    // Reuse the buffer that failed to parse into an UTF8 string
+                    self.decode_buf = Some(err.into_bytes());
+                    self.current_byte += 1;
+                    continue; // Try the next key
+                }
+                Ok(s) => {
+                    let score = non_english_score(key as usize, &s);
+
+                    self.current_byte += 1;
+
+                    return Some(DecodeResult {
+                        key: key,
+                        ptext: s,
+                        score: score,
+                    });
+                }
+            }
+        }
+
+        return None;
+    }
+}
+
 lazy_static! {
     static ref LETTERS_FREQ_TUPLES: Vec<(char, f64)> = {
         [
@@ -117,32 +174,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let input =
         hex::decode("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")?;
 
-    let mut results: Vec<DecodeResult> = vec![DecodeResult::default(); 255];
-    results.truncate(0);
-
-    let mut buf = vec![0; input.len()];
-    for key in 0x00..0xff {
-        xor(&mut buf, &input, key);
-
-        match String::from_utf8(buf) {
-            Err(err) => {
-                // Reuse the buffer that failed to parse into a string
-                buf = err.into_bytes();
-            }
-            Ok(s) => {
-                let score = non_english_score(key as usize, &s);
-
-                results.push(DecodeResult {
-                    key: key,
-                    ptext: s,
-                    score: score,
-                });
-
-                // Allocate a new buffer for the next decode
-                buf = vec![0; input.len()];
-            }
-        }
-    }
+    let mut results: Vec<DecodeResult> = SingleCharKeyCracker::new(input).collect();
 
     results.sort_by(|a, b| b.partial_cmp(&a).unwrap());
 
