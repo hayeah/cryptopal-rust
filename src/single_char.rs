@@ -10,9 +10,17 @@ pub fn xor(dst: &mut [u8], src: &[u8], mask: u8) {
 
 #[derive(PartialEq, PartialOrd, Default, Clone)]
 pub struct DecodeResult {
-  score: f64,
-  key: u8,
-  ptext: String,
+  pub score: f64,
+  pub key: u8,
+  pub ptext: String,
+}
+
+impl Eq for DecodeResult {}
+
+impl Ord for DecodeResult {
+  fn cmp(&self, other: &DecodeResult) -> std::cmp::Ordering {
+    return self.score.partial_cmp(&other.score).unwrap();
+  }
 }
 
 impl fmt::Display for DecodeResult {
@@ -40,6 +48,16 @@ impl Cracker {
       current_byte: 0,
       decode_buf: None,
     };
+  }
+
+  pub fn best_results(&mut self) -> Vec<DecodeResult> {
+    let mut results: Vec<DecodeResult> = self.collect();
+    results.sort();
+    return results;
+  }
+
+  pub fn best_result(&mut self) -> Option<DecodeResult> {
+    return self.min();
   }
 }
 
