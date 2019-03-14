@@ -26,16 +26,16 @@ impl fmt::Display for DecodeResult {
 }
 
 // SingleCharKeyCracker iterates through the ASCII bytes, as key to a xor cipher
-pub struct SingleCharKeyCracker {
+pub struct Cracker {
   ctext: Vec<u8>,
   current_byte: usize,
 
   decode_buf: Option<Vec<u8>>,
 }
 
-impl SingleCharKeyCracker {
-  pub fn new(ctext: Vec<u8>) -> SingleCharKeyCracker {
-    return SingleCharKeyCracker {
+impl Cracker {
+  pub fn new(ctext: Vec<u8>) -> Cracker {
+    return Cracker {
       ctext: ctext,
       current_byte: 0,
       decode_buf: None,
@@ -43,7 +43,7 @@ impl SingleCharKeyCracker {
   }
 }
 
-impl Iterator for SingleCharKeyCracker {
+impl Iterator for Cracker {
   type Item = DecodeResult;
 
   fn next(&mut self) -> Option<DecodeResult> {
