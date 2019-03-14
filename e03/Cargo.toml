@@ -7,4 +7,4 @@ workspace = ".."
 
 [dependencies]
 hex = "0.3.2"
-lazy_static = "1.3.0"
+cryptopal = { path = "../", version = "0.1.0" }
