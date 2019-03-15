@@ -79,41 +79,10 @@ impl IntoIterator for KeySizeAnalyzer {
 
     type IntoIter = Box<dyn Iterator<Item = Self::Item>>;
 
-    // type IntoIter = Box<Iterator<Item = KeySizeResult>>;
-    // fn into_iter(&self) -> impl Iterator<Item = KeySizeResult> {
-    //     self.iter()
-    // }
-
     fn into_iter(self) -> Self::IntoIter {
         Box::new(self.iter())
     }
 }
-
-// struct KeySizeAnalyzer<'a> {
-//     data: &'a [u8],
-//     range: std::ops::Range<usize>,
-// }
-
-// // <'a> IntoIterator for
-// impl<'a> KeySizeAnalyzer<'a> {
-//     // type Item = f64;
-//     // type IntoIter = std::iter::Map<f64, f64>;
-
-//     // fn into_iter(self) {
-//     //     return self
-//     //         .range
-//     //         .into_iter()
-//     //         .map(|keysize| hamming_score(self.data, keysize));
-//     // }
-//     fn iter(&self) -> impl Iterator<Item = f64> + 'a {
-//         return self
-//             .range
-//             .clone()
-//             .into_iter()
-//             .map(|keysize| hamming_score(self.data, keysize));
-//         // .map(|keysize| hamming_score(&self.data, keysize));
-//     }
-// }
 
 fn main() -> Result<(), failure::Error> {
     let data = Rc::new(read_base64_file("6.txt")?);
@@ -121,21 +90,8 @@ fn main() -> Result<(), failure::Error> {
     let keysize_analyzer = KeySizeAnalyzer::new(data.clone(), 2..40);
 
     for result in keysize_analyzer {
-        // let block1 = &data[0..keysize];
-        // let block2 = &data[keysize..2 * keysize];
-        // let d = hamming::distance(block1, block2);
-
-        // let score = d as f64 / keysize as f64;
-
-        // let score = hamming_score(&data, keysize);
-
         println!("{:?}", result);
     }
-
-    // println!(
-    //     "hamming distance: {}",
-    //     hamming::distance("this is a test".as_bytes(), "wokka wokka!!!".as_bytes())
-    // );
 
     return Ok(());
 }
