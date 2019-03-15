@@ -37,7 +37,7 @@ lazy_static! {
 
 // A string that matches the expected english letters frequency has score of 0.
 // The higher the score, the less english it looks.
-pub fn nonfit_score(_key: usize, s: &str) -> f64 {
+pub fn nonfit_score(s: &str) -> f64 {
   let mut char_counts: HashMap<char, i64> = HashMap::new();
 
   let mut score: f64 = 0.0;

@@ -83,7 +83,7 @@ impl Iterator for Cracker {
           continue; // Try the next key
         }
         Ok(s) => {
-          let score = english::nonfit_score(key as usize, &s);
+          let score = english::nonfit_score(&s);
 
           self.current_byte += 1;
 

@@ -8,6 +8,12 @@ fn xor_stream<'a>(
     return input.zip(key.into_iter().cycle()).map(|(a, b)| a ^ b);
 }
 
+fn xor_bytes(buf: &mut [u8], key: &[u8]) {
+    for (i, byte) in buf.iter_mut().enumerate() {
+        *byte = *byte ^ key[i % key.len()];
+    }
+}
+
 // fn xor_stream_boxed(
 //     input: Box<IntoIterator<Item = u8>>,
 //     key: Vec<u8>,
