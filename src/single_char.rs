@@ -34,20 +34,27 @@ impl fmt::Display for DecodeResult {
 }
 
 // SingleCharKeyCracker iterates through the ASCII bytes, as key to a xor cipher
-pub struct Cracker {
-  ctext: Vec<u8>,
+pub struct Cracker<'a> {
+  ctext: &'a [u8],
   current_byte: usize,
 
   decode_buf: Option<Vec<u8>>,
 }
 
-impl Cracker {
-  pub fn new(ctext: Vec<u8>) -> Cracker {
+impl<'a> Cracker<'a> {
+  pub fn new(ctext: &'a [u8]) -> Cracker<'a> {
     return Cracker {
       ctext: ctext,
       current_byte: 0,
       decode_buf: None,
     };
+  }
+
+  /// Returns the first solution that is has score less than limit
+  pub fn first(&mut self, limit: f64) -> Option<DecodeResult> {
+    self.find(|result| {
+      result.score < limit
+    })
   }
 
   pub fn best_results(&mut self) -> Vec<DecodeResult> {
@@ -61,7 +68,7 @@ impl Cracker {
   }
 }
 
-impl Iterator for Cracker {
+impl<'a> Iterator for Cracker<'a> {
   type Item = DecodeResult;
 
   fn next(&mut self) -> Option<DecodeResult> {

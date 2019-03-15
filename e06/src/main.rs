@@ -115,13 +115,6 @@ struct CrackResult {
     ptext: String,
 }
 
-// fn xor_stream<'a>(
-//     input: impl Iterator<Item = u8> + 'a,
-//     key: &'a [u8],
-// ) -> impl Iterator<Item = u8> + 'a {
-//     return input.zip(key.into_iter().cycle()).map(|(a, b)| a ^ b);
-// }
-
 fn xor_bytes(buf: &mut [u8], key: &[u8]) {
     for (i, byte) in buf.iter_mut().enumerate() {
         *byte = *byte ^ key[i % key.len()];
@@ -129,20 +122,16 @@ fn xor_bytes(buf: &mut [u8], key: &[u8]) {
 }
 
 fn crack(data: &[u8], blocksize: usize) -> Result<CrackResult, failure::Error> {
-    // find the key first, then decode the rest
     let mut block: Vec<u8> = vec![0; (data.len() / blocksize) + 1];
     let mut key: Vec<u8> = vec![0; blocksize];
 
     for col in 0..blocksize {
         block_column(&mut block, data, blocksize, col);
 
-        // TODO: get rid of clone..
-        let mut cracker = single_char::Cracker::new(block.clone());
-        if let Some(result) = cracker.best_result() {
-            // println!(
-            //     "col={} block={:?} key={} score={}",
-            //     col, block, result.key, result.score
-            // );
+        let mut cracker = single_char::Cracker::new(&block);
+
+        if let Some(result) = cracker.first(2000.0) {
+            // println!("score={}", result.score);
             key[col] = result.key;
         } else {
             return Err(format_err!("no key found"));
@@ -154,17 +143,11 @@ fn crack(data: &[u8], blocksize: usize) -> Result<CrackResult, failure::Error> {
 
     let ptext = String::from_utf8(ptext_bytes)?;
 
-    // if !ptext.is_ascii() {
-    //     return Err(format_err!("no ASCII plain text found"));
-    // }
-
     return Ok(CrackResult {
         score: cryptopal::english::nonfit_score(&ptext) as i64,
         ptext: ptext,
         key: String::from_utf8(key)?,
     });
-
-    // let block1 = &data[0..keysize];
 }
 
 fn main() -> Result<(), failure::Error> {
@@ -178,17 +161,14 @@ fn main() -> Result<(), failure::Error> {
     //     println!("{:?}", result);
     // }
 
-    for result in keysize_results.iter().take(3) {
+    for result in keysize_results.iter().take(10) {
         match crack(&data, result.keysize) {
-            Ok(result) => {
-                if result.score < 1000 {
-                    println!("{}", result.ptext);
-                    println!("KEY={:?}", result.key);
-                    break;
-                }
+            Ok(bingo) => {
+                println!("{}", bingo.ptext);
+                println!("keysize={} key={:?}", result.keysize, bingo.key);
             }
             Err(err) => {
-                println!("{}", err);
+                println!("keysize={} {}", result.keysize, err);
             }
         }
     }
