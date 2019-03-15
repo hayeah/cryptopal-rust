@@ -77,7 +77,7 @@ impl KeySizeAnalyzer {
 impl IntoIterator for KeySizeAnalyzer {
     type Item = KeySizeResult;
 
-    type IntoIter = Box<Iterator<Item = Self::Item>>;
+    type IntoIter = Box<dyn Iterator<Item = Self::Item>>;
 
     // type IntoIter = Box<Iterator<Item = KeySizeResult>>;
     // fn into_iter(&self) -> impl Iterator<Item = KeySizeResult> {
