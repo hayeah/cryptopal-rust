@@ -12,6 +12,11 @@ fn pkcs7_padding_extend_helper(data: &mut Vec<u8>, padn: u8) {
   }
 }
 
+pub fn unpad_mut(data: &mut Vec<u8>) {
+  let padn = *data.last().unwrap();
+  data.truncate(data.len() - padn as usize);
+}
+
 pub fn padding_mut(data: &mut Vec<u8>, blocksize: u8) {
   let padn = pkcs7_padding_size(data, blocksize);
   pkcs7_padding_extend_helper(data, padn);
