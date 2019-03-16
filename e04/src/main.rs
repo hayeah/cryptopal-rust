@@ -5,27 +5,16 @@ extern crate failure;
 
 extern crate hex;
 
+use cryptopal::encoding::HexLinesDecoder;
 use cryptopal::single_char::{Cracker, DecodeResult};
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::BufReader;
 
 #[derive(Fail, Debug)]
 enum Error {
-  #[fail(display = "Invalid hex string: {}", _0)]
-  InvalidHexErr(hex::FromHexError),
   #[fail(display = "No English plain text is found for line {}", _0)]
   NotFoundErr(usize),
 }
 
-impl From<hex::FromHexError> for Error {
-  fn from(e: hex::FromHexError) -> Error {
-    Error::InvalidHexErr(e)
-  }
-}
-
-fn crack(line: &str, lineno: usize) -> Result<DecodeResult, Error> {
-  let ctext = hex::decode(line)?;
+fn crack(ctext: &[u8], lineno: usize) -> Result<DecodeResult, Error> {
   let mut cracker = Cracker::new(&ctext);
   match cracker.best_result() {
     Some(result) => {
@@ -40,12 +29,10 @@ fn crack(line: &str, lineno: usize) -> Result<DecodeResult, Error> {
 }
 
 fn main() -> Result<(), failure::Error> {
-  let f = File::open("4.txt")?;
+  let decoder = HexLinesDecoder::file("4.txt")?;
 
-  let r = BufReader::new(f);
-
-  for (i, line) in r.lines().enumerate() {
-    if let Ok(result) = crack(&line?, i + 1) {
+  for (i, data) in decoder.iter().enumerate() {
+    if let Ok(result) = crack(&data?, i + 1) {
       println!("BINGO: line={} {}", i + 1, result);
     }
   }
