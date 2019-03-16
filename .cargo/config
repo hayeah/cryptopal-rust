@@ -1,0 +1,2 @@
+[build] # or [target.$triple]
+rustflags = ["-Ctarget-feature=+aes,+ssse3"]
