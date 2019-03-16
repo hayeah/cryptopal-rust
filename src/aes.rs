@@ -60,9 +60,11 @@ impl CBCDecrypter {
   }
 
   pub fn decrypt_block(&mut self, block: &mut [u8]) {
+    // mix = iv
     // ptext1 = aes_decrypt(ctext1, key)
-    // ptext1 = ptext1 ^ iv
+    // ptext1 = ptext1 ^ mix
     //
+    // mix = ctext1
     // ptext2 = aes_decrypt(ctext2, key)
     // ptext1 = ptext1 ^ ctext1
     //
@@ -71,9 +73,9 @@ impl CBCDecrypter {
     let ctext = Block128::clone_from_slice(block);
 
     decrypt_single_block(block, &self.key); // aes_decrypt(ctext1, key)
-    xor_bytes(block, &self.mix); // input = prev_ctext ^ ptext
+    xor_bytes(block, &self.mix); // ptext1 = ptext1 ^ mix
 
-    self.mix.copy_from_slice(&ctext);
+    self.mix.copy_from_slice(&ctext); // mix = ctext1
   }
 
   /// Decrypt AES cipher text inplace, then strip the PKCS7 padding
