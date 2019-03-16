@@ -4,6 +4,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate failure;
 
+pub mod aes;
 pub mod encoding;
 pub mod english;
 pub mod pkcs7;

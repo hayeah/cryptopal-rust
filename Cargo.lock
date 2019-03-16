@@ -70,6 +70,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "cryptopal"
 version = "0.1.0"
 dependencies = [
+ "aesni 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "base64 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "hex 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -132,7 +133,6 @@ dependencies = [
 name = "e07"
 version = "0.1.0"
 dependencies = [
- "aesni 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cryptopal 0.1.0",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

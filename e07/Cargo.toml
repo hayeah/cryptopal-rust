@@ -7,5 +7,4 @@ edition = "2018"
 [dependencies]
 cryptopal = { path = "../", version = "0.1.0" }
 failure = "0.1"
-aesni = "0.6"
 
