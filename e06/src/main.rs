@@ -4,29 +4,10 @@ extern crate failure;
 extern crate base64;
 extern crate hamming;
 
+use cryptopal::encoding::read_base64_file;
 use cryptopal::single_char;
 
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::BufReader;
-use std::path::Path;
-
 use std::rc::Rc;
-
-fn read_base64_file<P: AsRef<Path>>(path: P) -> Result<Vec<u8>, failure::Error> {
-    let f = File::open(path)?;
-    let r = BufReader::new(f);
-
-    let mut buf: Vec<u8> = Vec::new();
-
-    for line in r.lines() {
-        buf.write(line?.as_bytes())?;
-    }
-
-    return base64::decode(&buf).map_err(|_e| format_err!("base64 decode"));
-
-    // return Ok(buf);
-}
 
 fn hamming_score(data: &[u8], keysize: usize) -> f64 {
     let n = data.len() / keysize;
