@@ -11,16 +11,31 @@ const BLOCK_SIZE: usize = 16;
 
 pub type Block128 = GenericArray<u8, U16>;
 
-// Decrypt a buffer in place, ECB mode
-pub fn decrypt_ecb(data: &mut [u8], key: &Block128) {
-  assert!(
-    data.len() & BLOCK_SIZE == 0,
-    "data must be multiples of block size (128-bit)"
-  );
-  let cipher = Aes128::new(&key);
+pub struct ECBCipher {
+  cipher: Aes128,
+}
 
-  for chunk in data.chunks_exact_mut(BLOCK_SIZE) {
-    cipher.decrypt_block(Block128::from_mut_slice(chunk));
+impl ECBCipher {
+  pub fn new(key: &[u8]) -> ECBCipher {
+    ECBCipher {
+      cipher: Aes128::new(key.into()),
+    }
+  }
+
+  pub fn decrypt(&self, data: &mut Vec<u8>) {
+    for chunk in data.chunks_exact_mut(BLOCK_SIZE) {
+      self.cipher.decrypt_block(Block128::from_mut_slice(chunk));
+    }
+
+    pkcs7::unpad_mut(data);
+  }
+
+  pub fn encrypt(&self, data: &mut Vec<u8>) {
+    for chunk in data.chunks_exact_mut(BLOCK_SIZE) {
+      self.cipher.encrypt_block(Block128::from_mut_slice(chunk));
+    }
+
+    pkcs7::padding_mut(data, BLOCK_SIZE as u8);
   }
 }
 
