@@ -31,11 +31,11 @@ impl ECBCipher {
   }
 
   pub fn encrypt(&self, data: &mut Vec<u8>) {
+    pkcs7::padding_mut(data, BLOCK_SIZE as u8);
+    
     for chunk in data.chunks_exact_mut(BLOCK_SIZE) {
       self.cipher.encrypt_block(Block128::from_mut_slice(chunk));
     }
-
-    pkcs7::padding_mut(data, BLOCK_SIZE as u8);
   }
 }
 
