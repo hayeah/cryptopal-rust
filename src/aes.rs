@@ -7,7 +7,7 @@ use typenum::U16;
 use super::pkcs7;
 use super::xor_bytes;
 
-const BLOCK_SIZE: usize = 16;
+pub const BLOCK_SIZE: usize = 16;
 
 pub type Block128 = GenericArray<u8, U16>;
 
@@ -32,7 +32,7 @@ impl ECBCipher {
 
   pub fn encrypt(&self, data: &mut Vec<u8>) {
     pkcs7::padding_mut(data, BLOCK_SIZE as u8);
-    
+
     for chunk in data.chunks_exact_mut(BLOCK_SIZE) {
       self.cipher.encrypt_block(Block128::from_mut_slice(chunk));
     }
