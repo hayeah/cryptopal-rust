@@ -1,0 +1,9 @@
+[package]
+name = "e11"
+version = "0.1.0"
+authors = ["Howard Yeh <hayeah@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+cryptopal = { path = "../", version = "0.1.0" }
+rand = "0.6.5"
