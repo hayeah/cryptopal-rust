@@ -7,19 +7,24 @@ Implement AES128-CBC
 encrypt:
 
 ```
-ctext1 = aes(iv ^ ptext1, key)
-ctext2 = aes(ctext1 ^ ptext2, key)
+mix = iv
+ctext1 = aes_encrypt(mix ^ ptext1, key)
+
+mix = ctext1
+ctext2 = aes_encrypt(mix ^ ptext2, key)
 ...
 ```
 
 decrypt
 
 ```
+mix = iv
 ptext1 = aes_decrypt(ctext1, key)
-ptext1 = ptext1 ^ iv
+ptext1 = ptext1 ^ mix
 
+mix = ctext1
 ptext2 = aes_decrypt(ctext2, key)
-ptext1 = ptext1 ^ ctext1
+ptext1 = ptext1 ^ mix
 ...
 ```
 
