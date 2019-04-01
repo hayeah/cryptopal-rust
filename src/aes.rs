@@ -30,12 +30,17 @@ impl ECBCipher {
     pkcs7::unpad_mut(data);
   }
 
-  pub fn encrypt(&self, data: &mut Vec<u8>) {
-    pkcs7::padding_mut(data, BLOCK_SIZE as u8);
-
+  pub fn encrypt_nopadding(&self, data: &mut [u8]) {
+    assert!(data.len() % BLOCK_SIZE == 0);
     for chunk in data.chunks_exact_mut(BLOCK_SIZE) {
       self.cipher.encrypt_block(Block128::from_mut_slice(chunk));
     }
+  }
+
+  pub fn encrypt(&self, data: &mut Vec<u8>) {
+    pkcs7::padding_mut(data, BLOCK_SIZE as u8);
+
+    self.encrypt_nopadding(data);
   }
 }
 
