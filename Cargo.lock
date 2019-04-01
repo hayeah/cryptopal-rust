@@ -184,6 +184,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "e12"
+version = "0.1.0"
+dependencies = [
+ "cryptopal 0.1.0",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "failure"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
